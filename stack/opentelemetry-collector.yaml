@@ -1,0 +1,28 @@
+# The OpenTelemetry Collector: https://opentelemetry.io/docs/collector/
+# It receives the crew's traces and logs in OTLP and sends each signal to its store.
+
+receivers:
+  otlp:
+    protocols:
+      grpc: { endpoint: 0.0.0.0:4317 }
+      http: { endpoint: 0.0.0.0:4318 }
+
+processors:
+  batch: {}
+  attributes/no-code:                # the SDK adds the Python file and line to every log line: drop them
+    actions:
+      - { key: code.file.path, action: delete }
+      - { key: code.function.name, action: delete }
+      - { key: code.line.number, action: delete }
+
+exporters:
+  otlp_grpc/jaeger:                     # traces → Jaeger, in OTLP
+    endpoint: jaeger:4317
+    tls: { insecure: true }
+  otlp_http/loki:                   # logs → Loki, in OTLP
+    endpoint: http://loki:3100/otlp
+
+service:
+  pipelines:
+    traces: { receivers: [otlp], processors: [batch], exporters: [otlp_grpc/jaeger] }
+    logs:   { receivers: [otlp], processors: [attributes/no-code, batch], exporters: [otlp_http/loki] }

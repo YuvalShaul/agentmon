@@ -1,0 +1,11 @@
+# Prometheus: https://prometheus.io/docs/
+# Every 5 seconds it fetches the numbers at each target's /metrics.
+
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: crew
+    static_configs: [{ targets: ["crew:8000"] }]
+  - job_name: watchdog
+    static_configs: [{ targets: ["watchdog:9001"] }]

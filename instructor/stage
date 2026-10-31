@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# ./stage <n>: run the demo at stage n (1-5), starting and stopping programs to match.
+# The crew's code is the same at every stage; only the running programs change.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+file=$(ls instructor/stages/"$1"-*.env 2>/dev/null) || { echo "usage: $0 <1-5>"; ls instructor/stages; exit 1; }
+compose() { docker compose --env-file "$file" "$@"; }
+
+wanted=$(compose config --services)
+for service in $(docker compose --profile '*' config --services); do
+  grep -qx "$service" <<<"$wanted" || docker compose --profile '*' rm -sf "$service" >/dev/null 2>&1 || true
+done
+compose up -d --build --remove-orphans
+echo
+grep '^#' "$file" | sed 's/^# //'

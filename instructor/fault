@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# ./fault <target> <mode>: break something on purpose.
+#   ./fault search slow | error | hang | ok    the search API
+#   ./fault model  slow | error | hang | ok    the model API
+#   ./fault crew   freeze | unfreeze           pause the crew's process (it stops answering)
+#   ./fault clear                              everything back to normal
+set -euo pipefail
+cd "$(dirname "$0")/.."
+switch() { curl -s -X POST "localhost:$1/fault" -d "{\"mode\": \"$2\"}"; echo; }
+case "${1:-} ${2:-}" in
+  "search "*) switch 8082 "$2" ;;
+  "model "*)  switch 8081 "$2" ;;
+  "crew freeze")   docker compose pause crew ;;
+  "crew unfreeze") docker compose unpause crew ;;
+  "clear "*)  switch 8081 ok; switch 8082 ok; docker compose unpause crew 2>/dev/null || true ;;
+  *) sed -n '2,7p' "$0" | sed 's/^# //'; exit 1 ;;
+esac
