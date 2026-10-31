@@ -10,7 +10,9 @@ Everything runs on one machine, with Docker Compose, and is read in a local brow
   - Planner → Researcher (with a `search` tool) → Writer → Reviewer.
   - One agent per file, in `crew/agents/`.
   - It always makes its logs, spans and metrics: `crew/observe/`, one file per signal.
-- **The world outside** (`world/`): a fake model API and a fake search API.
+- **The world outside** (`world/`): 
+  - a fake model API
+  - a fake search API
   - They answer like the real thing, cost nothing, and can be broken on purpose.
 - **The programs that observe the crew**, each in its own container, each called by its product name:
   - [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/): receives the crew's traces and logs.
@@ -42,6 +44,40 @@ crew already makes. `instructor/stages/*.env` holds each stage's settings.
 
 `./instructor/fault` breaks things on purpose: a slow or failing search, a model that never answers,
 a frozen crew. `docker compose --profile '*' down` stops everything.
+
+## Calling each service
+
+Every address below is on this machine. A service with no port here is reached only by the other
+containers, by its service name (`http://loki:3100`).
+
+- **The crew** sets its own work: `main.py` runs the crew on each topic in `TOPICS`, one run every
+  `RUN_EVERY` seconds (5), round and round. To give it other topics, edit `TOPICS` and run the stage again.
+  - `curl localhost:8001/health`: `{"status": "ok"}` while the process runs.
+  - `curl localhost:8000/metrics`: its counts and durations, as Prometheus reads them.
+- **The model API**, port 8081: OpenAI's chat completions format. The agent is found by its role in
+  the system message.
+  ```bash
+  curl -s localhost:8081/v1/chat/completions -d '{"model": "sim-1", "messages": [
+    {"role": "system", "content": "You are the Planner."},
+    {"role": "user", "content": "Plan it.\nTopic: bees"}]}'
+  ```
+- **The search API**, port 8082: `curl 'localhost:8082/search?q=bees'`.
+- **Both fake APIs** take a fault: `curl localhost:8081/fault` shows it, and
+  `curl -X POST localhost:8081/fault -d '{"mode": "slow"}'` sets it (`ok`, `slow`, `error`, `hang`).
+  `instructor/fault` does this for you.
+- **The OpenTelemetry Collector**: no port here. The crew sends it OTLP at
+  `http://opentelemetry-collector:4318` (HTTP; gRPC on 4317), and it passes the spans to Jaeger and the
+  log lines to Loki.
+- **Jaeger**, port 16686: the UI at http://localhost:16686. Its API:
+  - `curl localhost:16686/api/v3/services`: the services that sent spans (`crew`).
+  - `curl localhost:16686/api/v3/traces/<trace_id>`: one trace, by the ID in a log line.
+- **Loki**: no port here. Read its log lines in Grafana (Explore → Loki, `{service_name="crew"}`).
+- **Prometheus**, port 9090: the UI at http://localhost:9090, or its API:
+  `curl 'localhost:9090/api/v1/query?query=crew_runs_total'`.
+- **Grafana**, port 3000: http://localhost:3000, no login; it opens on the dashboard *The crew*.
+- **The watchdog**: no port here; read it with `docker compose logs -f watchdog`.
+  - The crew posts its heartbeats to `http://watchdog:9000/heartbeat`.
+  - Prometheus reads its numbers from `http://watchdog:9001/metrics`.
 
 ## Reading the code
 
