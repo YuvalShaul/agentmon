@@ -1,7 +1,7 @@
 # agentmon: a crew of AI agents, and the programs that observe it.
 #
 # The crew always makes its logs, spans and metrics. Which programs run to
-# collect, store and show them is set by COMPOSE_PROFILES (see instructor/stages/).
+# collect, store and show them is set by COMPOSE_PROFILES (see operator/stages/).
 
 services:
 
@@ -9,7 +9,7 @@ services:
   model-api:
     build: world
     environment: { ROLE: model }
-    ports: ["127.0.0.1:8081:8080"]      # for instructor/fault
+    ports: ["127.0.0.1:8081:8080"]      # for operator/fault
   search-api:
     build: world
     environment: { ROLE: search }

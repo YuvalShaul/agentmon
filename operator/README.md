@@ -1,11 +1,13 @@
-# The instructor's side
+# Operating the demo
 
 Two commands, run from anywhere:
 
 - `./stage <1-5>`: starts the programs of that stage and stops the others.
 - `./fault <target> <mode>`: breaks something on purpose.
 
-Nothing here is course code: the crew never asks which stage it is in.
+Nothing here is the crew's code: the crew never asks which stage it is in.
+
+To stop everything: `docker compose --profile '*' down`, from the repository's top directory.
 
 ## The stages
 

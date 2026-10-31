@@ -22,12 +22,23 @@ Everything runs on one machine, with Docker Compose, and is read in a local brow
   - [Grafana](https://grafana.com/docs/grafana/latest/): reads all three.
 - **The watchdog** (`watchdog/`): health checks, heartbeats, restarts and alerts.
 
+## Trying it yourself
+
+You need Docker with Compose, and nothing else: no API key, no internet once the images are downloaded.
+
+1. Clone this repository and go into it.
+2. Run `./operator/stage 1`, and watch the crew's log lines with `docker compose logs -f crew`.
+3. Go on with stages 2 to 5, then break things with `./operator/fault`.
+
+[`operator/README.md`](operator/README.md) is the guide: what each stage adds, what to open, and what
+each fault does and where it shows.
+
 ## Running it
 
 Docker with Compose is all it needs. From this directory:
 
 ```bash
-./instructor/stage 5            # everything; or 1-4 for fewer programs (see below)
+./operator/stage 5              # everything; or 1-4 for fewer programs (see below)
 docker compose logs -f crew     # the crew's log lines
 ```
 
@@ -40,9 +51,9 @@ docker compose logs -f crew     # the crew's log lines
 | 5 | the watchdog | `docker compose logs -f watchdog` |
 
 The crew's code is the same at every stage: a stage only starts the programs that collect what the
-crew already makes. `instructor/stages/*.env` holds each stage's settings.
+crew already makes. `operator/stages/*.env` holds each stage's settings.
 
-`./instructor/fault` breaks things on purpose: a slow or failing search, a model that never answers,
+`./operator/fault` breaks things on purpose: a slow or failing search, a model that never answers,
 a frozen crew. `docker compose --profile '*' down` stops everything.
 
 ## Calling each service
@@ -64,7 +75,7 @@ containers, by its service name (`http://loki:3100`).
 - **The search API**, port 8082: `curl 'localhost:8082/search?q=bees'`.
 - **Both fake APIs** take a fault: `curl localhost:8081/fault` shows it, and
   `curl -X POST localhost:8081/fault -d '{"mode": "slow"}'` sets it (`ok`, `slow`, `error`, `hang`).
-  `instructor/fault` does this for you.
+  `operator/fault` does this for you.
 - **The OpenTelemetry Collector**: no port here. The crew sends it OTLP at
   `http://opentelemetry-collector:4318` (HTTP; gRPC on 4317), and it passes the spans to Jaeger and the
   log lines to Loki.

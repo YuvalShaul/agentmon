@@ -3,7 +3,7 @@
 # The crew's code is the same at every stage; only the running programs change.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-file=$(ls instructor/stages/"$1"-*.env 2>/dev/null) || { echo "usage: $0 <1-5>"; ls instructor/stages; exit 1; }
+file=$(ls operator/stages/"${1:-}"-*.env 2>/dev/null) || { echo "usage: $0 <1-5>"; ls operator/stages; exit 1; }
 compose() { docker compose --env-file "$file" "$@"; }
 
 wanted=$(compose config --services)

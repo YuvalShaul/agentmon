@@ -2,13 +2,13 @@
 
 One program, two roles: compose runs it twice, as model-api and search-api.
 Each answers at once, costs nothing and gives the same answer every time.
-The instructor flips a fault switch with POST /fault {"mode": "ok" | "slow" | "error" | "hang"}:
+The operator flips a fault switch with POST /fault {"mode": "ok" | "slow" | "error" | "hang"}:
 
   slow   every answer takes SLOW_SECONDS
   error  every answer is 503 Service Unavailable
   hang   no answer at all: the connection stays open
 
-Not student code: in real life these are someone else's services.
+Not the crew's code: in real life these are someone else's services.
 """
 
 import json
