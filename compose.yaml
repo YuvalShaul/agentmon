@@ -49,7 +49,8 @@ services:
 
   # Jaeger: https://www.jaegertracing.io/docs/
   jaeger:
-    image: jaegertracing/jaeger:2.22.0
+    # 2.20: the last release with the HTTP API Grafana's Jaeger source searches with (/api/services, /api/traces).
+    image: jaegertracing/jaeger:2.20.0
     profiles: [traces]
     ports: ["16686:16686"]                  # the UI
 

@@ -26,6 +26,8 @@ datasources:
     jsonData:
       tracesToLogsV2:
         datasourceUid: loki
-        filterByTraceID: true
+        # Loki keeps trace_id beside the line, not in its text: a filter on the field, not a text search.
+        customQuery: true
+        query: '{service_name="crew"} | trace_id="$${__trace.traceId}"'
         spanStartTimeShift: "-1m"
         spanEndTimeShift: "1m"

@@ -20,6 +20,7 @@ To stop everything: `docker compose --profile '*' down`, from the repository's t
    - Prometheus, http://localhost:9090, fetches it every 5 s: try `rate(crew_runs_total[1m])`.
 4. **Grafana.** http://localhost:3000, the dashboard *The crew*.
    - A log line's `trace_id` opens its trace in Jaeger.
+   - A span's *Related logs* opens its run's log lines from Loki.
 5. **The watchdog.** `docker compose logs -f watchdog`.
 
 ## The faults
