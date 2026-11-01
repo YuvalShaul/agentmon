@@ -35,7 +35,8 @@ To stop everything: `docker compose --profile '*' down`, from the repository's t
 | `./fault crew freeze` | the crew's process is paused | the health check fails; the watchdog restarts the crew |
 | `./fault clear` | everything back to normal | |
 
-After the watchdog stops the crew: `./fault clear`, then `./stage 5` again.
+After the watchdog stops the crew, `./fault clear` starts the crew again and restarts the watchdog, which forgets that it gave up.
+Clearing a `hang` also releases the requests that were already hanging.
 
 A hung run's spans are never sent: a span is sent when it ends. Its log lines, up to the last step, are
 in Loki, and the watchdog's alert names its trace ID.

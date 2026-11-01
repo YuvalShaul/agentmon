@@ -6,7 +6,7 @@ The operator flips a fault switch with POST /fault {"mode": "ok" | "slow" | "err
 
   slow   every answer takes SLOW_SECONDS
   error  every answer is 503 Service Unavailable
-  hang   no answer at all: the connection stays open
+  hang   no answer at all: the connection stays open until the mode changes
 
 Not the crew's code: in real life these are someone else's services.
 """
@@ -54,8 +54,8 @@ def set_fault():
 
 def broken():
     """Apply the fault: wait, never answer, or return the error to send instead of an answer."""
-    if fault["mode"] == "hang":
-        time.sleep(3600)
+    while fault["mode"] == "hang":   # until the operator clears the fault
+        time.sleep(0.5)
     if fault["mode"] == "slow":
         time.sleep(SLOW_SECONDS)
     if fault["mode"] == "error":

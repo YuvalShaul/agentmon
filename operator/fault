@@ -3,7 +3,7 @@
 #   ./fault search slow | error | hang | ok    the search API
 #   ./fault model  slow | error | hang | ok    the model API
 #   ./fault crew   freeze | unfreeze           pause the crew's process (it stops answering)
-#   ./fault clear                              everything back to normal
+#   ./fault clear                              everything back to normal, and the crew and the watchdog started again
 set -euo pipefail
 cd "$(dirname "$0")/.."
 switch() { curl -s -X POST "localhost:$1/fault" -d "{\"mode\": \"$2\"}"; echo; }
@@ -12,6 +12,10 @@ case "${1:-} ${2:-}" in
   "model "*)  switch 8081 "$2" ;;
   "crew freeze")   docker compose pause crew ;;
   "crew unfreeze") docker compose unpause crew ;;
-  "clear "*)  switch 8081 ok; switch 8082 ok; docker compose unpause crew 2>/dev/null || true ;;
+  "clear "*)  switch 8081 ok; switch 8082 ok
+              docker compose unpause crew 2>/dev/null || true
+              docker compose start crew
+              # The watchdog may have given up and stopped acting: start it over.
+              docker compose restart watchdog 2>/dev/null || true ;;
   *) sed -n '2,7p' "$0" | sed 's/^# //'; exit 1 ;;
 esac
