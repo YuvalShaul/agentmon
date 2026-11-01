@@ -1,5 +1,8 @@
 # agentmon: observing a crew of AI agents
 
+**[Agent Monitoring: a Crew Observed](https://www.yuval.guide/ai/agent-monitoring/agent-monitoring-crew/)** is an
+interactive viewer that replays this repository, stage by stage: what each program does, and what to look for.
+
 A small [CrewAI](https://docs.crewai.com/) crew of four agents, and the programs that observe it:
 its logs, traces and metrics, a Grafana dashboard, and a watchdog.
 Everything runs on one machine, with Docker Compose, and is read in a local browser.
@@ -92,13 +95,5 @@ containers, by its service name (`http://loki:3100`).
 
 ## Reading the code
 
-- `crew/main.py`: takes one topic after another, retrying a failed run.
-- `crew/crew.py`: puts the four agents together.
-- `crew/agents/*.py`: one agent and its task each.
-- `crew/observe/events.py`: CrewAI announces every step as an event; this hands each to the signals.
-  - `traces.py`: one span per step, inside the span of the step that started it.
-  - `logs.py`: one log line per step, with the step's trace ID and span ID.
-  - `metrics.py`: counts and durations, served at `/metrics`.
-  - `heartbeat.py`: tells the watchdog after every step that the crew is making progress.
-  - `health.py`: answers `/health` while the process runs.
-- `watchdog/watchdog.py`: finds four problems and decides for each: restart, stop or alert.
+[`CODE.md`](CODE.md) goes through the monitoring, file by file: what each piece does, and the documentation
+it rests on.
